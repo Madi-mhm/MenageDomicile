@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PropreMove — Ménage & Déménagement à domicile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #f5f0e8;
+  --cream-dark: #ede6d6;
+  --warm-white: #faf7f2;
+  --ink: #1a1612;
+  --ink-light: #4a4035;
+  --ink-dim: #8a7d6e;
+  --orange: #c85a1e;
+  --orange-light: #e06b2a;
+  --green: #2d5a3d;
+  --green-light: #3a7350;
+  --gold: #c49a3c;
+  --card-bg: #fff9f2;
+  --border: rgba(26,22,18,0.1);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--warm-white);
+  color: var(--ink);
+  font-family: 'Barlow', sans-serif;
+  font-weight: 300;
+  overflow-x: hidden;
+}
+
+/* === NOISE TEXTURE === */
+body::after {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  opacity:0.6;
+}
+
+/* === NAV === */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:200;
+  display: flex; align-items:center; justify-content:space-between;
+  padding: 1.2rem 5rem;
+  background: rgba(245,240,232,0.92);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem; font-weight: 900;
+  color: var(--ink);
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.nav-logo .logo-dot { color: var(--orange); }
+.nav-links { display:flex; gap:2.5rem; list-style:none; }
+.nav-links a {
+  color: var(--ink-light); text-decoration:none;
+  font-size: 0.82rem; letter-spacing:0.08em; text-transform:uppercase; font-weight:500;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--orange); }
+.nav-cta {
+  background: var(--orange);
+  color: white !important;
+  padding: 0.55rem 1.5rem; border-radius: 2px;
+}
+.nav-cta:hover { background: var(--orange-light) !important; color: white !important; }
+
+/* === HERO === */
+#hero {
+  min-height: 100vh;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  padding-top: 80px;
+}
+
+.hero-left {
+  display: flex; flex-direction:column; justify-content:center;
+  padding: 6rem 4rem 6rem 5rem;
+  position: relative; z-index:2;
+}
+
+.hero-tag {
+  display: inline-flex; align-items:center; gap:0.8rem;
+  background: var(--cream-dark); border:1px solid var(--border);
+  padding: 0.4rem 1rem; border-radius: 50px;
+  font-size: 0.72rem; letter-spacing:0.15em; text-transform:uppercase;
+  color: var(--orange); font-weight:600; margin-bottom:2rem;
+  animation: fadeUp 0.7s ease 0.1s both;
+}
+.tag-dot { width:6px; height:6px; background:var(--orange); border-radius:50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+.hero-h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3.5rem, 5.5vw, 6rem);
+  font-weight: 900; line-height: 0.95;
+  animation: fadeUp 0.7s ease 0.25s both;
+  margin-bottom: 1.8rem;
+}
+.hero-h1 .line-orange { color: var(--orange); font-style: italic; }
+.hero-h1 .line-green { color: var(--green); }
+
+.hero-sub {
+  font-size: 1.05rem; color: var(--ink-light); line-height: 1.8;
+  max-width: 420px; margin-bottom: 2.5rem;
+  animation: fadeUp 0.7s ease 0.4s both;
+}
+
+.hero-actions {
+  display:flex; gap:1rem; flex-wrap:wrap;
+  animation: fadeUp 0.7s ease 0.55s both;
+}
+.btn-fill {
+  background: var(--orange); color: white;
+  padding: 1rem 2.2rem; border-radius:3px; text-decoration:none;
+  font-size: 0.85rem; letter-spacing:0.08em; text-transform:uppercase; font-weight:600;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 24px rgba(200,90,30,0.3);
+}
+.btn-fill:hover { background: var(--orange-light); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(200,90,30,0.4); }
+.btn-outline {
+  background: transparent; color: var(--ink);
+  padding: 1rem 2rem; border-radius:3px; text-decoration:none;
+  font-size: 0.85rem; letter-spacing:0.08em; text-transform:uppercase; font-weight:500;
+  border: 1.5px solid var(--border);
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-outline:hover { border-color: var(--ink); color: var(--ink); }
+
+.hero-right {
+  position: relative; background: var(--cream);
+  display: flex; align-items:center; justify-content:center;
+  overflow: hidden;
+}
+.hero-illustration {
+  position: relative; z-index:2; text-align:center;
+  animation: fadeUp 0.9s ease 0.3s both;
+}
+.hero-big-icon { font-size: 9rem; display:block; line-height:1; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.15)); }
+.hero-icon-caption {
+  font-family:'Playfair Display',serif; font-size:1.1rem; font-style:italic;
+  color: var(--ink-dim); margin-top:1rem;
+}
+/* diagonal divider */
+.hero-right::before {
+  content:''; position:absolute; left:-60px; top:0; bottom:0; width:120px;
+  background: var(--warm-white);
+  clip-path: polygon(0 0, 60px 0, 100% 100%, 0 100%);
+  z-index:1;
+}
+/* geometric pattern */
+.hero-right::after {
+  content:''; position:absolute; inset:0;
+  background-image: radial-gradient(circle, rgba(200,90,30,0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+  z-index:0;
+}
+.hero-badges {
+  position:absolute; z-index:3;
+  display:flex; flex-direction:column; gap:1rem;
+  right: 3rem; bottom: 4rem;
+}
+.badge {
+  background: white; border:1px solid var(--border);
+  padding: 0.8rem 1.2rem; border-radius:6px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  display:flex; align-items:center; gap:0.8rem;
+  font-size:0.8rem; font-weight:500;
+  animation: slideLeft 0.6s ease both;
+}
+.badge:nth-child(1) { animation-delay: 0.6s; }
+.badge:nth-child(2) { animation-delay: 0.8s; }
+.badge:nth-child(3) { animation-delay: 1s; }
+.badge-icon { font-size:1.2rem; }
+.badge-val { font-family:'Playfair Display',serif; font-weight:700; font-size:1rem; }
+.badge-label { color:var(--ink-dim); font-size:0.72rem; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(25px);} to{opacity:1;transform:translateY(0);} }
+@keyframes slideLeft { from{opacity:0;transform:translateX(20px);} to{opacity:1;transform:translateX(0);} }
+
+/* === SERVICES BAND === */
+.services-band {
+  background: var(--ink); color: white;
+  display: grid; grid-template-columns: repeat(3,1fr);
+  position: relative; z-index:5;
+}
+.service-tab {
+  padding: 3.5rem 3rem;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  position:relative; overflow:hidden; cursor:pointer;
+  transition: background 0.3s;
+}
+.service-tab:last-child { border-right:none; }
+.service-tab::before {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:3px;
+  transform: scaleX(0); transform-origin:left;
+  transition: transform 0.4s ease;
+}
+.service-tab.orange::before { background: var(--orange); }
+.service-tab.green::before { background: var(--green-light); }
+.service-tab.gold::before { background: var(--gold); }
+.service-tab:hover { background: rgba(255,255,255,0.04); }
+.service-tab:hover::before { transform: scaleX(1); }
+.st-num {
+  font-family:'Playfair Display',serif; font-size:4rem; font-weight:900;
+  line-height:1; opacity:0.06; position:absolute; top:1.5rem; right:2rem;
+  user-select:none;
+}
+.st-icon { font-size:2.2rem; margin-bottom:1.2rem; display:block; }
+.st-title { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; margin-bottom:0.6rem; }
+.st-desc { font-size:0.85rem; color:rgba(255,255,255,0.5); line-height:1.7; }
+
+/* === SECTION BASE === */
+section { padding: 7rem 5rem; position:relative; z-index:2; }
+.section-label {
+  font-size:0.7rem; letter-spacing:0.28em; text-transform:uppercase; font-weight:600;
+  color:var(--orange); margin-bottom:0.8rem;
+  display:flex; align-items:center; gap:0.8rem;
+}
+.section-label::after { content:''; flex:1; max-width:50px; height:1px; background:var(--orange); }
+.section-title {
+  font-family:'Playfair Display',serif;
+  font-size: clamp(2.5rem,5vw,4.5rem); font-weight:900; line-height:1.05;
+  margin-bottom:1.5rem;
+}
+
+/* === DETAIL SERVICES === */
+#detail { background: var(--warm-white); }
+.detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:3px; margin-top:4rem; }
+.detail-card {
+  background: var(--card-bg);
+  border:1px solid var(--border);
+  padding:3.5rem 3rem;
+  position:relative; overflow:hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.detail-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.07); }
+.detail-card.featured {
+  background: var(--ink); color: white;
+  grid-column: span 1;
+}
+.detail-stripe {
+  position:absolute; top:0; left:0; right:0; height:4px;
+}
+.detail-stripe.orange { background: var(--orange); }
+.detail-stripe.green { background: var(--green); }
+.detail-stripe.gold { background: var(--gold); }
+.detail-icon-big { font-size:3.5rem; display:block; margin-bottom:1.8rem; }
+.detail-title { font-family:'Playfair Display',serif; font-size:2rem; font-weight:900; margin-bottom:1rem; }
+.detail-desc { font-size:0.9rem; line-height:1.8; color:var(--ink-light); margin-bottom:1.5rem; }
+.detail-card.featured .detail-desc { color: rgba(255,255,255,0.6); }
+.detail-list { list-style:none; display:flex; flex-direction:column; gap:0.5rem; margin-bottom:2rem; }
+.detail-list li {
+  font-size:0.85rem; color:var(--ink-light);
+  display:flex; align-items:center; gap:0.7rem;
+}
+.detail-card.featured .detail-list li { color: rgba(255,255,255,0.65); }
+.detail-list li::before { content:'✓'; color:var(--orange); font-weight:700; }
+.detail-card.featured .detail-list li::before { color: var(--gold); }
+.detail-price {
+  font-family:'Playfair Display',serif; font-size:2.8rem; font-weight:900;
+  color:var(--orange);
+}
+.detail-card.featured .detail-price { color: var(--gold); }
+.detail-price span { font-family:'Barlow',sans-serif; font-size:0.8rem; color:var(--ink-dim); font-weight:400; }
+.detail-card.featured .detail-price span { color: rgba(255,255,255,0.4); }
+
+/* === PROCESS === */
+#process { background: var(--cream); }
+.process-header { display:grid; grid-template-columns:1fr 1fr; gap:6rem; margin-bottom:5rem; }
+.process-steps { display:flex; flex-direction:column; }
+.pstep {
+  display:grid; grid-template-columns: 80px 1fr; gap:2rem;
+  padding:2.5rem 0; border-bottom:1px solid var(--border);
+  position:relative; transition: padding-left 0.3s;
+}
+.pstep:hover { padding-left:0.5rem; }
+.pstep:last-child { border-bottom:none; }
+.pstep-num {
+  font-family:'Playfair Display',serif; font-size:4rem; font-weight:900;
+  line-height:1; color:var(--cream-dark); -webkit-text-stroke: 1px var(--border);
+  position:relative; top:-8px;
+}
+.pstep-title { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; margin-bottom:0.4rem; }
+.pstep-desc { font-size:0.88rem; color:var(--ink-dim); line-height:1.7; }
+
+.process-visual-side {
+  background: var(--ink); color:white;
+  padding:3rem; border-radius:4px;
+  display:flex; flex-direction:column; justify-content:space-between;
+  align-self: start; position:sticky; top:120px;
+}
+.pvs-title { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:900; margin-bottom:2rem; }
+.pvs-item {
+  display:flex; align-items:center; gap:1.2rem;
+  padding:1.2rem 0; border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.pvs-item:last-child { border-bottom:none; }
+.pvs-icon { font-size:1.6rem; min-width:36px; }
+.pvs-text h4 { font-size:0.85rem; font-weight:600; margin-bottom:0.2rem; }
+.pvs-text p { font-size:0.78rem; color:rgba(255,255,255,0.45); }
+
+/* === TESTIMONIALS === */
+#testimonials { background: var(--warm-white); }
+.testimonials-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin-top:4rem; }
+.tcard {
+  background: var(--card-bg); border:1px solid var(--border);
+  padding:2.5rem 2rem; border-radius:3px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  position:relative; overflow:hidden;
+}
+.tcard::before {
+  content:'"'; position:absolute; top:-0.5rem; right:1.5rem;
+  font-family:'Playfair Display',serif; font-size:7rem; font-weight:900;
+  color: var(--cream-dark); line-height:1; pointer-events:none;
+}
+.tcard:hover { transform:translateY(-4px); box-shadow:0 16px 50px rgba(0,0,0,0.06); }
+.tcard-stars { color:var(--orange); letter-spacing:0.1em; margin-bottom:1rem; font-size:0.85rem; }
+.tcard-text { font-size:0.92rem; color:var(--ink-light); line-height:1.8; margin-bottom:1.5rem; font-style:italic; }
+.tcard-author { font-weight:600; font-size:0.85rem; }
+.tcard-detail { font-size:0.75rem; color:var(--ink-dim); margin-top:0.2rem; }
+.tcard-service {
+  display:inline-block; margin-top:0.8rem;
+  font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; font-weight:600;
+  padding:0.25rem 0.7rem; border-radius:50px;
+}
+.tcard-service.orange { background:rgba(200,90,30,0.1); color:var(--orange); }
+.tcard-service.green { background:rgba(45,90,61,0.1); color:var(--green); }
+.tcard-service.gold { background:rgba(196,154,60,0.1); color:var(--gold); }
+
+/* === STATS === */
+.stats-section {
+  background: var(--ink); color:white;
+  display: grid; grid-template-columns:repeat(4,1fr);
+  position:relative; z-index:5;
+}
+.stat-block {
+  padding: 4rem 3rem;
+  border-right:1px solid rgba(255,255,255,0.07);
+  transition: background 0.3s;
+}
+.stat-block:last-child { border-right:none; }
+.stat-block:hover { background: rgba(255,255,255,0.03); }
+.stat-num {
+  font-family:'Playfair Display',serif; font-size:3.8rem; font-weight:900;
+  line-height:1; color:var(--orange); margin-bottom:0.4rem;
+}
+.stat-label { font-size:0.8rem; color:rgba(255,255,255,0.45); letter-spacing:0.05em; }
+
+/* === BOOKING === */
+#booking { background: var(--cream); }
+.booking-layout { display:grid; grid-template-columns:1fr 1.1fr; gap:6rem; align-items:start; }
+.booking-promises { display:flex; flex-direction:column; gap:1rem; margin-top:2.5rem; }
+.promise {
+  display:flex; gap:1.2rem; align-items:flex-start;
+  padding:1.2rem 1.5rem; background:var(--card-bg);
+  border:1px solid var(--border); border-radius:3px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.promise:hover { border-color:var(--orange); box-shadow:0 4px 20px rgba(200,90,30,0.08); }
+.promise-icon { font-size:1.3rem; }
+.promise h4 { font-size:0.85rem; font-weight:600; margin-bottom:0.2rem; }
+.promise p { font-size:0.78rem; color:var(--ink-dim); }
+
+.booking-form {
+  background: white; border:1px solid var(--border);
+  padding:3rem; box-shadow:0 20px 80px rgba(0,0,0,0.06);
+}
+.form-title { font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:900; margin-bottom:2rem; }
+.fg { margin-bottom:1.3rem; }
+.flabel {
+  display:block; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase;
+  font-weight:600; color:var(--ink-dim); margin-bottom:0.5rem;
+}
+.fcontrol {
+  width:100%; padding:0.85rem 1rem;
+  border:1.5px solid var(--border); background:var(--warm-white);
+  color:var(--ink); font-family:'Barlow',sans-serif; font-size:0.9rem;
+  border-radius:3px; outline:none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance:none;
+}
+.fcontrol:focus { border-color:var(--orange); box-shadow:0 0 0 3px rgba(200,90,30,0.08); }
+.fcontrol option { background:white; }
+.frow { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.fsubmit {
+  width:100%; padding:1.1rem;
+  background: var(--orange); color:white; border:none; border-radius:3px;
+  font-family:'Barlow',sans-serif; font-size:0.85rem; letter-spacing:0.12em; text-transform:uppercase; font-weight:600;
+  cursor:pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow:0 4px 20px rgba(200,90,30,0.3);
+}
+.fsubmit:hover { background:var(--orange-light); transform:translateY(-2px); box-shadow:0 8px 32px rgba(200,90,30,0.4); }
+.service-radio-group { display:flex; gap:0.5rem; flex-wrap:wrap; }
+.sradio { display:none; }
+.sradio-label {
+  padding:0.5rem 1.1rem; border:1.5px solid var(--border); border-radius:50px;
+  font-size:0.78rem; font-weight:500; cursor:pointer;
+  transition:border-color 0.2s, background 0.2s, color 0.2s;
+}
+.sradio:checked + .sradio-label {
+  border-color:var(--orange); background:var(--orange); color:white;
+}
+
+/* === FOOTER === */
+footer {
+  background: var(--ink); color:white;
+  padding: 5rem 5rem 2.5rem;
+  position:relative; z-index:2;
+}
+.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr; gap:5rem; margin-bottom:4rem; }
+.footer-logo-mark { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:900; margin-bottom:0.8rem; }
+.footer-logo-mark .dot { color:var(--orange); }
+.footer-tagline { font-size:0.85rem; color:rgba(255,255,255,0.4); line-height:1.7; max-width:280px; margin-bottom:2rem; }
+.footer-contact-item { display:flex; align-items:center; gap:0.8rem; margin-bottom:0.7rem; font-size:0.85rem; }
+.footer-contact-item a { color:rgba(255,255,255,0.6); text-decoration:none; transition:color 0.2s; }
+.footer-contact-item a:hover { color:var(--orange); }
+.footer-col-title { font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:1.5rem; font-weight:600; }
+.footer-links { list-style:none; display:flex; flex-direction:column; gap:0.6rem; }
+.footer-links a { color:rgba(255,255,255,0.5); text-decoration:none; font-size:0.85rem; transition:color 0.2s; }
+.footer-links a:hover { color:white; }
+.footer-bottom {
+  border-top:1px solid rgba(255,255,255,0.07); padding-top:2rem;
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:0.75rem; color:rgba(255,255,255,0.25);
+}
+
+/* === FLOATING CTA === */
+.float-cta {
+  position:fixed; bottom:2rem; right:2rem; z-index:200;
+  background:var(--orange); color:white; text-decoration:none;
+  padding:0.85rem 1.8rem; border-radius:3px;
+  font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; font-weight:600;
+  box-shadow:0 4px 30px rgba(200,90,30,0.45);
+  transition:transform 0.2s, box-shadow 0.2s;
+  display:flex; align-items:center; gap:0.6rem;
+}
+.float-cta:hover { transform:translateY(-3px); box-shadow:0 10px 40px rgba(200,90,30,0.55); }
+
+/* === MODAL === */
+.modal-overlay {
+  display:none; position:fixed; inset:0; z-index:500;
+  background:rgba(26,22,18,0.88); backdrop-filter:blur(8px);
+  align-items:center; justify-content:center;
+}
+.modal-overlay.active { display:flex; }
+.modal {
+  background:white; padding:3.5rem; max-width:460px; width:90%;
+  text-align:center; border-radius:4px;
+  animation: fadeUp 0.4s ease;
+  border-top: 4px solid var(--orange);
+}
+.modal-icon { font-size:3rem; margin-bottom:1.2rem; }
+.modal-title { font-family:'Playfair Display',serif; font-size:2rem; font-weight:900; margin-bottom:0.8rem; }
+.modal-text { font-size:0.9rem; color:var(--ink-dim); line-height:1.7; margin-bottom:2rem; }
+.modal-close {
+  padding:0.8rem 2.2rem; background:var(--orange); color:white; border:none;
+  border-radius:3px; font-family:'Barlow',sans-serif; font-size:0.85rem;
+  font-weight:600; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer;
+  transition: background 0.2s;
+}
+.modal-close:hover { background: var(--orange-light); }
+
+/* === SCROLL REVEAL === */
+.reveal { opacity:0; transform:translateY(35px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+.rd1 { transition-delay:0.1s; }
+.rd2 { transition-delay:0.2s; }
+.rd3 { transition-delay:0.3s; }
+.rd4 { transition-delay:0.4s; }
+
+@media(max-width:900px){
+  nav { padding:1.2rem 1.5rem; }
+  .nav-links { display:none; }
+  section { padding:5rem 1.5rem; }
+  #hero { grid-template-columns:1fr; }
+  .hero-left { padding:5rem 1.5rem 3rem; }
+  .hero-right { display:none; }
+  .services-band { grid-template-columns:1fr; }
+  .service-tab { border-right:none; border-bottom:1px solid rgba(255,255,255,0.07); }
+  .detail-grid, .process-header, .booking-layout, .testimonials-grid, .footer-grid { grid-template-columns:1fr; }
+  .stats-section { grid-template-columns:1fr 1fr; }
+  .process-visual-side { position:static; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Propre<span class="logo-dot">&</span>Move</div>
+  <ul class="nav-links">
+    <li><a href="#detail">Services</a></li>
+    <li><a href="#process">Comment ça marche</a></li>
+    <li><a href="#testimonials">Avis clients</a></li>
+    <li><a href="#booking" class="nav-cta">Devis gratuit</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <div class="hero-tag"><span class="tag-dot"></span>Lyon & agglomération · Disponible 7j/7</div>
+    <h1 class="hero-h1">
+      Propre,<br>
+      <span class="line-orange">Ordonné,</span><br>
+      <span class="line-green">Déménagé.</span>
+    </h1>
+    <p class="hero-sub">Ménage à domicile, nettoyage professionnel ou déménagement avec camion 3,5T — une seule équipe, une seule confiance.</p>
+    <div class="hero-actions">
+      <a href="#booking" class="btn-fill">Demander un devis</a>
+      <a href="#detail" class="btn-outline">Nos services</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-illustration">
+      <span class="hero-big-icon">🧹</span>
+      <div class="hero-icon-caption">L'équipe qui fait tout.</div>
+    </div>
+    <div class="hero-badges">
+      <div class="badge">
+        <span class="badge-icon">⭐</span>
+        <div>
+          <div class="badge-val">4,9/5</div>
+          <div class="badge-label">Note moyenne clients</div>
+        </div>
+      </div>
+      <div class="badge">
+        <span class="badge-icon">🚛</span>
+        <div>
+          <div class="badge-val">Camion 3,5T</div>
+          <div class="badge-label">Disponible dès J+1</div>
+        </div>
+      </div>
+      <div class="badge">
+        <span class="badge-icon">✅</span>
+        <div>
+          <div class="badge-val">Devis Gratuit</div>
+          <div class="badge-label">Réponse en 30 min</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES BAND -->
+<div class="services-band">
+  <div class="service-tab orange" onclick="location.href='#booking'">
+    <div class="st-num">01</div>
+    <span class="st-icon">🏠</span>
+    <div class="st-title">Ménage à domicile</div>
+    <p class="st-desc">Entretien régulier ou grand ménage — votre intérieur toujours impeccable.</p>
+  </div>
+  <div class="service-tab green" onclick="location.href='#booking'">
+    <div class="st-num">02</div>
+    <span class="st-icon">🏢</span>
+    <div class="st-title">Nettoyage professionnel</div>
+    <p class="st-desc">Bureaux, commerces, chantiers, remise en état — pro et efficace.</p>
+  </div>
+  <div class="service-tab gold" onclick="location.href='#booking'">
+    <div class="st-num">03</div>
+    <span class="st-icon">🚛</span>
+    <div class="st-title">Déménagement 3,5T</div>
+    <p class="st-desc">Camion + équipe formée, manutention incluse. Du studio à la maison.</p>
+  </div>
+</div>
+
+<!-- DETAIL SERVICES -->
+<section id="detail">
+  <div class="section-label reveal">Ce que nous faisons</div>
+  <h2 class="section-title reveal">Trois expertises,<br>une seule équipe</h2>
+  <div class="detail-grid">
+    <!-- Ménage domicile -->
+    <div class="detail-card reveal">
+      <div class="detail-stripe orange"></div>
+      <span class="detail-icon-big">🏠</span>
+      <div class="detail-title">Ménage à domicile</div>
+      <p class="detail-desc">Votre maison mérite une attention professionnelle. Nous intervenons régulièrement ou pour un grand ménage ponctuel.</p>
+      <ul class="detail-list">
+        <li>Dépoussiérage complet, sols & surfaces</li>
+        <li>Cuisine & salle de bain en profondeur</li>
+        <li>Vitres, miroirs, robinetterie</li>
+        <li>Rangement & organisation</li>
+        <li>Produits ménagers fournis</li>
+      </ul>
+      <div class="detail-price">20 € <span>/ heure · à partir de</span></div>
+    </div>
+    <!-- Pro -->
+    <div class="detail-card featured reveal rd1">
+      <div class="detail-stripe gold"></div>
+      <span class="detail-icon-big">🏢</span>
+      <div class="detail-title">Nettoyage professionnel</div>
+      <p class="detail-desc">Locaux commerciaux, bureaux, après travaux, remise en état locatif — nous gérons les chantiers exigeants.</p>
+      <ul class="detail-list">
+        <li>Bureaux, open-spaces, salles de réunion</li>
+        <li>Commerces & espaces de vente</li>
+        <li>Remise en état fin de bail</li>
+        <li>Nettoyage post-chantier</li>
+        <li>Traitement des sols (cristallisation, monobrosse)</li>
+      </ul>
+      <div class="detail-price">Sur devis <span>· réponse sous 30 min</span></div>
+    </div>
+    <!-- Déménagement -->
+    <div class="detail-card reveal rd2" style="grid-column:span 2; display:grid; grid-template-columns:1fr 1fr; gap:3rem;">
+      <div>
+        <div class="detail-stripe gold"></div>
+        <span class="detail-icon-big">🚛</span>
+        <div class="detail-title">Déménagement avec camion 3,5T</div>
+        <p class="detail-desc">Camion 3,5 tonnes + équipe expérimentée. Du studio au 5 pièces, nous gérons votre déménagement de A à Z avec soin.</p>
+        <ul class="detail-list">
+          <li>Camion 3,5T équipé (sangles, couvertures, diable)</li>
+          <li>Montage & démontage de meubles</li>
+          <li>Emballage & protection inclus</li>
+          <li>Chargement, transport, déchargement</li>
+          <li>Mise en place dans le nouveau logement</li>
+        </ul>
+      </div>
+      <div style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <p style="font-size:0.85rem; color:var(--ink-dim); line-height:1.8; margin-bottom:1.5rem;">Nos véhicules sont assurés tous risques. Vous bénéficiez d'une assurance marchandises transportées. Devis personnalisé selon volume et distance.</p>
+          <div style="background:var(--cream); padding:1.5rem; border-radius:3px; border:1px solid var(--border);">
+            <div style="font-size:0.75rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:0.5rem; font-weight:600;">Inclus dans chaque déménagement</div>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.8rem;">
+              <span style="background:white; border:1px solid var(--border); padding:0.3rem 0.8rem; border-radius:50px; font-size:0.75rem;">🛡️ Assuré</span>
+              <span style="background:white; border:1px solid var(--border); padding:0.3rem 0.8rem; border-radius:50px; font-size:0.75rem;">📦 Emballage</span>
+              <span style="background:white; border:1px solid var(--border); padding:0.3rem 0.8rem; border-radius:50px; font-size:0.75rem;">🪛 Montage</span>
+              <span style="background:white; border:1px solid var(--border); padding:0.3rem 0.8rem; border-radius:50px; font-size:0.75rem;">🤝 2 personnes</span>
+            </div>
+          </div>
+        </div>
+        <div class="detail-price" style="margin-top:2rem;">À partir de 90 € <span>/ demi-journée</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-section">
+  <div class="stat-block reveal">
+    <div class="stat-num">300+</div>
+    <div class="stat-label">Clients satisfaits</div>
+  </div>
+  <div class="stat-block reveal rd1">
+    <div class="stat-num">4,9★</div>
+    <div class="stat-label">Note moyenne</div>
+  </div>
+  <div class="stat-block reveal rd2">
+    <div class="stat-num">7j/7</div>
+    <div class="stat-label">Disponibilité</div>
+  </div>
+  <div class="stat-block reveal rd3">
+    <div class="stat-num">3,5T</div>
+    <div class="stat-label">Capacité camion</div>
+  </div>
+</div>
+
+<!-- PROCESS -->
+<section id="process">
+  <div class="process-header">
+    <div>
+      <div class="section-label reveal">Notre méthode</div>
+      <h2 class="section-title reveal">Simple,<br>rapide,<br>efficace.</h2>
+      <p class="reveal" style="color:var(--ink-dim); font-size:0.95rem; line-height:1.8;">Pas de prise de tête. Vous nous contactez, on s'occupe de tout. En 4 étapes simples.</p>
+    </div>
+    <div class="process-visual-side reveal">
+      <div class="pvs-title">Pourquoi nous choisir ?</div>
+      <div class="pvs-item">
+        <div class="pvs-icon">⚡</div>
+        <div class="pvs-text">
+          <h4>Réactivité</h4>
+          <p>Devis sous 30 minutes, intervention possible dès J+1</p>
+        </div>
+      </div>
+      <div class="pvs-item">
+        <div class="pvs-icon">🔒</div>
+        <div class="pvs-text">
+          <h4>Fiabilité</h4>
+          <p>Équipe stable, ponctuelle, et respectueuse de votre espace</p>
+        </div>
+      </div>
+      <div class="pvs-item">
+        <div class="pvs-icon">💬</div>
+        <div class="pvs-text">
+          <h4>Suivi</h4>
+          <p>Un interlocuteur unique du devis jusqu'à la fin de la mission</p>
+        </div>
+      </div>
+      <div class="pvs-item">
+        <div class="pvs-icon">✅</div>
+        <div class="pvs-text">
+          <h4>Satisfaction garantie</h4>
+          <p>Pas satisfait ? On revient sans frais supplémentaires</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="process-steps">
+    <div class="pstep reveal">
+      <div class="pstep-num">01</div>
+      <div>
+        <div class="pstep-title">Contactez-nous</div>
+        <p class="pstep-desc">Remplissez le formulaire ou appelez-nous directement. Décrivez votre besoin en quelques lignes — logement, surface, date souhaitée.</p>
+      </div>
+    </div>
+    <div class="pstep reveal rd1">
+      <div class="pstep-num">02</div>
+      <div>
+        <div class="pstep-title">Devis personnalisé sous 30 min</div>
+        <p class="pstep-desc">Nous analysons votre demande et vous envoyons un devis clair et transparent. Pas de mauvaises surprises.</p>
+      </div>
+    </div>
+    <div class="pstep reveal rd2">
+      <div class="pstep-num">03</div>
+      <div>
+        <div class="pstep-title">On intervient</div>
+        <p class="pstep-desc">Notre équipe arrive à l'heure avec tout le matériel nécessaire. Vous n'avez rien à prévoir de votre côté.</p>
+      </div>
+    </div>
+    <div class="pstep reveal rd3">
+      <div class="pstep-num">04</div>
+      <div>
+        <div class="pstep-title">Vous validez & recommandez</div>
+        <p class="pstep-desc">Inspection finale ensemble. Vous payez uniquement si vous êtes 100% satisfait. Parrainez un ami et obtenez une remise.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="section-label reveal">Ils nous font confiance</div>
+  <h2 class="section-title reveal">Ce que disent<br>nos clients</h2>
+  <div class="testimonials-grid">
+    <div class="tcard reveal">
+      <div class="tcard-stars">★★★★★</div>
+      <p class="tcard-text">"Super équipe, très professionnelle. Mon appartement n'a jamais été aussi propre. Je les prends maintenant chaque semaine."</p>
+      <div class="tcard-author">Marie L.</div>
+      <div class="tcard-detail">Lyon 3ème</div>
+      <span class="tcard-service orange">Ménage domicile</span>
+    </div>
+    <div class="tcard reveal rd1">
+      <div class="tcard-stars">★★★★★</div>
+      <p class="tcard-text">"Notre déménagement s'est passé sans stress. Ponctuels, soigneux avec nos affaires, et le camion était parfaitement équipé. Je recommande vivement."</p>
+      <div class="tcard-author">Karim & Sarah B.</div>
+      <div class="tcard-detail">Villeurbanne → Bron</div>
+      <span class="tcard-service gold">Déménagement</span>
+    </div>
+    <div class="tcard reveal rd2">
+      <div class="tcard-stars">★★★★★</div>
+      <p class="tcard-text">"Remise en état de nos locaux après travaux — travail impeccable, rapide, et le prix était très raisonnable. On a retrouvé des bureaux comme neufs."</p>
+      <div class="tcard-author">Rachid M.</div>
+      <div class="tcard-detail">Gérant, Lyon 6ème</div>
+      <span class="tcard-service green">Pro</span>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING -->
+<section id="booking">
+  <div class="booking-layout">
+    <div>
+      <div class="section-label reveal">Devis gratuit</div>
+      <h2 class="section-title reveal">Parlons<br>de votre besoin</h2>
+      <p class="reveal" style="color:var(--ink-dim); font-size:0.95rem; line-height:1.8; margin-bottom:2rem;">Remplissez le formulaire et recevez votre devis personnalisé en moins de 30 minutes. Sans engagement.</p>
+      <div class="booking-promises">
+        <div class="promise reveal">
+          <div class="promise-icon">📍</div>
+          <div>
+            <h4>Zone d'intervention</h4>
+            <p>Lyon & agglomération — rayon 40 km</p>
+          </div>
+        </div>
+        <div class="promise reveal rd1">
+          <div class="promise-icon">⏰</div>
+          <div>
+            <h4>Disponibilité 7j/7 · 8h–20h</h4>
+            <p>Week-ends et jours fériés inclus</p>
+          </div>
+        </div>
+        <div class="promise reveal rd2">
+          <div class="promise-icon">💶</div>
+          <div>
+            <h4>Devis 100% gratuit & sans engagement</h4>
+            <p>Transparent, sans frais cachés</p>
+          </div>
+        </div>
+        <div class="promise reveal rd3">
+          <div class="promise-icon">✅</div>
+          <div>
+            <h4>Satisfaction garantie</h4>
+            <p>On revient gratuitement si ce n'est pas parfait</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="booking-form reveal">
+      <div class="form-title">Demande de devis</div>
+      <div class="fg">
+        <label class="flabel">Service souhaité</label>
+        <div class="service-radio-group">
+          <input type="radio" name="service" id="s1" class="sradio" value="Ménage domicile" checked>
+          <label for="s1" class="sradio-label">🏠 Ménage domicile</label>
+          <input type="radio" name="service" id="s2" class="sradio" value="Nettoyage pro">
+          <label for="s2" class="sradio-label">🏢 Pro</label>
+          <input type="radio" name="service" id="s3" class="sradio" value="Déménagement">
+          <label for="s3" class="sradio-label">🚛 Déménagement</label>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label class="flabel">Prénom</label>
+          <input type="text" class="fcontrol" placeholder="Jean" id="f-name">
+        </div>
+        <div class="fg">
+          <label class="flabel">Nom</label>
+          <input type="text" class="fcontrol" placeholder="Dupont" id="f-lastname">
+        </div>
+      </div>
+      <div class="fg">
+        <label class="flabel">Téléphone</label>
+        <input type="tel" class="fcontrol" placeholder="06 00 00 00 00" id="f-tel">
+      </div>
+      <div class="fg">
+        <label class="flabel">Adresse</label>
+        <input type="text" class="fcontrol" placeholder="12 rue de la Paix, Lyon 69001" id="f-addr">
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label class="flabel">Surface / Volume</label>
+          <select class="fcontrol" id="f-surface">
+            <option value="">Choisir...</option>
+            <option>Studio / T1</option>
+            <option>T2 / T3</option>
+            <option>T4 / T5</option>
+            <option>Maison</option>
+            <option>Local commercial</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label class="flabel">Date souhaitée</label>
+          <input type="date" class="fcontrol" id="f-date">
+        </div>
+      </div>
+      <div class="fg">
+        <label class="flabel">Message (optionnel)</label>
+        <textarea class="fcontrol" rows="3" placeholder="Précisez votre besoin..." id="f-message" style="resize:vertical;"></textarea>
+      </div>
+      <button class="fsubmit" onclick="submitForm()">Envoyer ma demande →</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo-mark">Propre<span class="dot">&</span>Move</div>
+      <p class="footer-tagline">Ménage à domicile, nettoyage professionnel et déménagement — une seule équipe de confiance pour tous vos besoins.</p>
+      <div class="footer-contact-item">📞 <a href="tel:+33600000000">06 00 00 00 00</a></div>
+      <div class="footer-contact-item">✉️ <a href="mailto:contact@propremove.fr">contact@propremove.fr</a></div>
+      <div class="footer-contact-item">📍 Lyon & agglomération</div>
+    </div>
+    <div>
+      <div class="footer-col-title">Services</div>
+      <ul class="footer-links">
+        <li><a href="#detail">Ménage à domicile</a></li>
+        <li><a href="#detail">Nettoyage professionnel</a></li>
+        <li><a href="#detail">Déménagement 3,5T</a></li>
+        <li><a href="#booking">Devis gratuit</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Informations</div>
+      <ul class="footer-links">
+        <li><a href="#">Mentions légales</a></li>
+        <li><a href="#">CGV</a></li>
+        <li><a href="#">Politique de confidentialité</a></li>
+        <li><a href="#testimonials">Avis clients</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2025 Propre&Move. Tous droits réservés.</div>
+    <div>Lyon & agglomération · 7j/7</div>
+  </div>
+</footer>
+
+<!-- FLOAT CTA -->
+<a href="tel:+33600000000" class="float-cta">📞 Appeler maintenant</a>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-icon">🎉</div>
+    <div class="modal-title">Demande envoyée !</div>
+    <p class="modal-text">Merci ! Nous analysons votre demande et vous rappelons sous 30 minutes avec un devis personnalisé. À très vite !</p>
+    <button class="modal-close" onclick="closeModal()">Parfait, merci !</button>
+  </div>
+</div>
+
+<script>
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+reveals.forEach(el => obs.observe(el));
+
+// Date min
+const di = document.getElementById('f-date');
+if(di) di.min = new Date().toISOString().split('T')[0];
+
+// Form
+function submitForm() {
+  const name = document.getElementById('f-name').value.trim();
+  const tel = document.getElementById('f-tel').value.trim();
+  if(!name || !tel) { alert('Merci de renseigner votre prénom et numéro de téléphone.'); return; }
+  document.getElementById('modal').classList.add('active');
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+// Service tab hover icon rotation
+document.querySelectorAll('.service-tab').forEach(tab => {
+  tab.addEventListener('mouseenter', () => {
+    const icon = tab.querySelector('.st-icon');
+    icon.style.transform = 'scale(1.15) rotate(-5deg)';
+    icon.style.transition = 'transform 0.3s ease';
+  });
+  tab.addEventListener('mouseleave', () => {
+    const icon = tab.querySelector('.st-icon');
+    icon.style.transform = 'scale(1) rotate(0deg)';
+  });
+});
+</script>
+</body>
+</html>
